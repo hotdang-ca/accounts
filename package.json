@@ -8,7 +8,8 @@
     "start:all": "concurrently --kill-others \"npm run start:server\" \"npm run start:client\"",
     "start:dev": "npm run start:all",
     "start:production": "cd client && npm install --only=dev && npm install && npm run build && cd .. && node ./bin/www",
-    "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build"
+    "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build",
+    "start": "npm run start:server"
   },
   "dependencies": {
     "body-parser": "~1.18.2",
