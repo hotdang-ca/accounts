@@ -1,8 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const uuidv1 = require('uuid/v1'); // account IDs, as well as owner cookies
-
-const ACCOUNTS = {};
+var uuidv1 = require('uuid/v1'); // account IDs, as well as owner cookies
+var Account = require('../../../model/Account');
 
 router.get('*', function (req, res, next) {
   // middleware for all routes
@@ -11,14 +10,19 @@ router.get('*', function (req, res, next) {
   } else {
     req.session.owner = uuidv1();
     console.log('New owner', req.session.owner);
-    ACCOUNTS[req.session.owner] = [];
   }
 
   next();
 });
 
 router.get('/', function (req, res, next) {
-  res.status(200).json(ACCOUNTS[req.session.owner]);
+  Account.find({ owner: req.session.owner }, function(err, account) {
+    if (err) {
+      return res.status(200).json([]);
+    }
+
+    res.status(200).json(account);
+  });
 });
 
 router.post('/', function (req, res, next) {
@@ -26,55 +30,65 @@ router.post('/', function (req, res, next) {
   const { name } = req.body;
   const id = uuidv1();
 
-  console.log('owners objects', ACCOUNTS[req.session.owner]);
-
-  ACCOUNTS[req.session.owner].push({
+  var account = new Account({
     id,
     name,
     balance: 0,
+    owner: req.session.owner,
   });
 
-  res.status(200).json({ id });
+  account.save(function (err, newAccount) {
+    if (err) {
+      return res.status(err.status).json({ err });
+    }
+
+    res.status(200).json({ id });
+  });
 });
 
 router.get('/:accountId', function (req, res, next) {
   // show account by Id
-  let requestedAccount = {};
+  const { accountId } = req.params;
+  Account.find({id: accountId}, function(err, account) {
+    if (err) {
+      return res.status(404).json({ err });
+    }
 
-  requestedAccount = ACCOUNTS[req.session.owner].find(function (account) {
-    return account.id === req.params.accountId;
+    return res.status(200).json(account[0]);
   });
-
-  res.status(requestedAccount ? 200 : 404).json(requestedAccount);
 });
 
 router.post('/:accountId/:action/', function (req, res, next) {
   const { accountId, action } = req.params;
   const { amount } = req.body;
 
+  Account.find({id: accountId}, function(err, account) {
+    if (err) {
+      return res.status(404).json({});
+    }
 
-  const requestedAccount = ACCOUNTS[req.session.owner].find(function (account) {
-    return account.id === accountId;
-  });
+    if (!['debit', 'credit'].includes(action)) {
+      return res.status(403).json({ message: 'invalid request' });
+    }
 
-  if (!requestedAccount) {
-    return res.status(404).json({ message: 'not found' });
-  }
+    try {
+      var newAmount = parseFloat(amount);
 
-  if (! ['debit', 'credit'].includes(action)) {
-    return res.status(403).json({ message: 'invalid request' });
-  }
-
-  ACCOUNTS[req.session.owner].forEach((account) => {
-    if (account.id === accountId) {
-      // this is the one!
       if (action === 'debit') {
-        account.balance -= parseFloat(amount);
+        account[0].balance -= newAmount;
       } else if (action === 'credit') {
-        account.balance += parseFloat(amount);
+        account[0].balance += newAmount;
       }
 
-      return res.status(200).json(account);
+      account[0].save(function(err, savedAccount) {
+        if (err) {
+          return res.status(400).json({ err });
+        }
+
+        return res.status(200).json(savedAccount);
+      });
+    } catch (e) {
+      return res.status(400).json({ err: 'invalid balance amount' });
     }
   });
 });

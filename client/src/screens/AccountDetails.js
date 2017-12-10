@@ -7,6 +7,7 @@ class AccountDetails extends Component {
     found: true,
     action: 'debit',
     amount: undefined,
+    err: undefined,
   };
 
   componentDidMount() {
@@ -30,8 +31,11 @@ class AccountDetails extends Component {
 
   handleTransaction = (e) => {
     const { action, amount, account } = this.state;
-
     e.preventDefault();
+
+    this.setState({
+      err: undefined,
+    });
 
     const payload = {
       amount,
@@ -49,14 +53,18 @@ class AccountDetails extends Component {
       return res.json();
     })
     .then((account) => {
-      this.setState({ account });
+      if (account.err) {
+        this.setState({ err: account.err.message });
+        return;
+      }
+
+      this.setState({ account, amount: undefined, });
       this.valueInput.value = '';
-      // this.valueInput.target.value = '';
     });
   }
 
   render() {
-    const { account, found } = this.state;
+    const { account, found, err } = this.state;
 
     return (
       <div className="App">
@@ -74,6 +82,13 @@ class AccountDetails extends Component {
           }
         </header>
 
+        <div>
+          {
+            err
+            ? <h3 style={{ color: 'red' }}>{err}</h3>
+            : null
+          }
+        </div>
         {
           found
           ?

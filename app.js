@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var mongoose = require('mongoose');
+var config = require('dotenv').config();
 
 var app = express();
 
@@ -30,6 +32,17 @@ app.use(cookieParser());
 // ROUTER
 var accountsController = require('./routes/api/accounts');
 app.use('/api/accounts', accountsController);
+
+// DB Configuration
+try {
+  var mongoDB = process.env.DB_CONNECTION_STRING;
+  mongoose.connect(mongoDB, { useMongoClient: true })
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+  var Account = require('./model/Account');
+} catch (e) {
+  console.log('No db connection. Set DB_CONNECTION_STRING in ENV');
+}
 
 // client configuration
 app.use(express.static(path.join(__dirname, 'client/build')));
