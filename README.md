@@ -3,7 +3,7 @@
 ## What is it
 Simple Accounts keeper. Mostly an example of how to run a [React](https://reactjs.org) front-end (particularily, [`create-react-app`](https://github.com/facebookincubator/create-react-app)) on top of an [Express](https://expressjs.com/) backend server.
 
-`Express` parts live in `routes/` primarily, as well as `/app.js`. `React` parts live in `client/`.
+`Express` parts live in `routes/` primarily, as well as `/app.js`. `React` parts live in `client/`. Mongoose Models in `models/`.
 
 ## Haven't I heard about this before?
 Yup. This method is generally called [Isomorphic](https://medium.com/monitisemea/isomorphic-universal-javascript-496dc8c4341a) or [Universal](https://medium.com/@mjackson/universal-javascript-4761051b7ae9) Javascript, though this is an over-simplified example, and not quite either... yet. Essentially, this just keep the Express parts expressy, and the React parts reacty, but bundled as one application.
@@ -20,7 +20,7 @@ Basically, so I don't have to use the very large and opinionated [M.E.R.N. Stack
 - [Universal JavaScript](https://medium.com/@mjackson/universal-javascript-4761051b7ae9) - Michael Jackson 
 
 ## TODO
-- Database persistence (instead of in-Memory)
+- ~~Database persistence (instead of in-Memory)~~ Done, with [Mongoose ORM](http://mongoosejs.com)
 - Sharing your accounts list with others 
 
 ## LICENSE
