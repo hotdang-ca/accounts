@@ -7,14 +7,31 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
 var config = require('dotenv').config();
+var MongoDBStore = require('connect-mongodb-session')(session);
 
 var app = express();
+
+// Session Storage for grownups
+var store = new MongoDBStore({
+  uri: process.env.DB_SESSIONS_CONNECTION_STRING,
+  collection: 'sessions'
+});
+
+// Catch errors
+store.on('error', function(error) {
+  assert.ifError(error);
+  assert.ok(false);
+});
 
 app.use(session({
   secret: 'this-is-a-secret-token',
   resave: true,
   saveUninitialized: true,
-  cookie: { maxAge: 365 * 24 *  60 * 60 * 1000 },
+  store: store,
+  cookie: {
+    maxAge: 365 * 24 *  60 * 60 * 1000,
+  },
+  proxy: true,
 }));
 
 // view engine setup
