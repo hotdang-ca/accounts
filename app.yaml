@@ -1,0 +1,8 @@
+runtime: nodejs
+env: flex
+
+includes:
+- env/env.yaml
+
+skip_files:
+  - ^node_modules$
