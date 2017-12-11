@@ -12,6 +12,47 @@ Yup. This method is generally called [Isomorphic](https://medium.com/monitisemea
 
 Basically, so I don't have to use the very large and opinionated [M.E.R.N. Stack](http://mern.io/).
 
+## Deploying
+
+### Heroku
+For deploying to Heroku using the Heroku CLI, see [this article](https://devcenter.heroku.com/articles/creating-apps). Briefly:
+
+```
+$ heroku create
+... 
+$ git push heroku master
+...
+```
+
+You'll also want to set some ENV vars required by the app:
+`DB_CONNECTION_STRING` and `DB_SESSIONS_CONNECTION_STRING`. You can set this in the Heroku App’s settings tab on Dashboard, or using the CLI:
+
+```
+heroku config:set DB_CONNECTION_STRING=<your MongoDB connection string for the data table>
+heroku config:set DB_SESSIONS_CONNECTION_STRING=<your MongoDB connection string for the session table>
+
+```
+
+### Google App Engine
+All GAE NodeJS apps require a `flex` config. Read up on the [Google App Engine Documentation for NodeJS Applications](https://cloud.google.com/appengine/docs/flexible/nodejs/download). Briefly:
+
+- Specify env vars in `/env/env.yaml`:
+
+```
+env_variables:
+  DB_CONNECTION_STRING: <your MongoDB connection string for the data table>
+  DB_SESSIONS_CONNECTION_STRING: <your MongoDB connection string for the session table>
+```
+- Download and install the Google Cloud SDK
+- Run `gcloud projects create`
+- Run `gcloud app create`
+- Configure billing on the GAE [Billing](https://console.cloud.google.com/projectselector/billing) page
+- Run `gcloud app deploy`
+- Wait 10-15 minutes; watch your console patiently for status
+- Run `gcloud app browse`
+
+### Anything else
+See documentation for your platform and environment. Essentially, ensure the ENV vars are set.
 
 ## Blog articles
 - [Create React App with an Express Backend](https://daveceddia.com/create-react-app-express-backend/) - Dave Ceddia
